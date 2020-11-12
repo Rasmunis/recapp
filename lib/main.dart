@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tagging/flutter_tagging.dart';
 
 void main() {
   runApp(MyApp());
