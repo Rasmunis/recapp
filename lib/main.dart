@@ -115,3 +115,27 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
+
+class Ingredient extends Taggable {
+  final String name;
+  final List<RecipeIngredient> recipeIngredients;
+
+  Ingredient({
+    this.name,
+    this.recipeIngredients,
+  });
+
+  @override
+  List<Object> get props => [name];
+}
+
+class RecipeIngredient {
+  final int recipeId;
+  final String recipeName;
+
+  RecipeIngredient({
+    this.recipeId,
+    this.recipeName,
+  });
+}
