@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tagging/flutter_tagging.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -117,18 +119,60 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+Future<List<Ingredient>> fetchIngredientsContaining(String nameSubstring) async {
+  final response = await http.get("https://recapi.azurewebsites.net/api/Ingredients/search?query=$nameSubstring");
+
+  if (response.statusCode == 200) {
+    List<dynamic> ingredientsJson = json.decode(response.body);
+    List<Ingredient> ingredients = [];
+
+    ingredientsJson.forEach((value) {
+      ingredients.add(Ingredient.fromJson(value));
+    });
+
+    return ingredients;
+  }
+  else {
+    throw Exception("Failed to load ingredient");
+  }
+}
 
 class Ingredient extends Taggable {
+  final int id;
   final String name;
-  final List<RecipeIngredient> recipeIngredients;
 
   Ingredient({
+    this.id,
     this.name,
-    this.recipeIngredients,
   });
 
   @override
   List<Object> get props => [name];
+
+  Future<List<RecipeIngredient>> fetchRecipes() async {
+    final response = await http.get("https://recapi.azurewebsites.net/api/Ingredients/${this.id}/recipes");
+
+    if (response.statusCode == 200) {
+      List<dynamic> recipeIngredientsJson = json.decode(response.body);
+      List<RecipeIngredient> recipeIngredients = [];
+
+      recipeIngredientsJson.forEach((value) {
+        recipeIngredients.add(RecipeIngredient.fromJson(value));
+      });
+
+      return recipeIngredients;
+    }
+    else {
+      throw Exception("Failed to load recipes of ${this.name}");
+    }
+  }
+
+  factory Ingredient.fromJson(Map<String, dynamic> json) {
+    return Ingredient(
+      id: json['id'],
+      name: json['name'],
+    );
+  }
 }
 
 class RecipeIngredient {
@@ -139,4 +183,11 @@ class RecipeIngredient {
     this.recipeId,
     this.recipeName,
   });
+
+  factory RecipeIngredient.fromJson(Map<String, dynamic> json) {
+    return RecipeIngredient(
+      recipeId: json['recipeId'],
+      recipeName: json['recipeName']
+    );
+  }
 }
