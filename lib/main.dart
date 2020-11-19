@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tagging/flutter_tagging.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:recapp/components/ingredient_search_results.dart';
+import 'package:recapp/services/ingredient_service.dart';
 
 import 'models/ingredient.dart';
 
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: "Rasmus' Cookbook"),
+      home: MyHomePage(title: "Rasmus' Kokebok"),
     );
   }
 }
@@ -36,7 +36,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<Ingredient> _selectedIngredients = [];
   List<Ingredient> _previouslySelectedIngredients = [];
-  Map<String, dynamic> _recipes = {};
+  Map<String, dynamic> _ingredientsAndRecipes = {};
 
   @override
   Widget build(BuildContext context) {
@@ -78,34 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               )
             ),
-            ListView.separated(
-              physics: ClampingScrollPhysics(),
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(8),
-              itemCount: _recipes.length,
-              itemBuilder: (BuildContext context, int index) {
-                String ingredientName = _recipes.keys.elementAt(index);
-                return Container(
-                    child: Column(
-                      children: <Widget>[
-                        Text(
-                            ingredientName,
-                            style: TextStyle(fontWeight: FontWeight.bold)
-                        ),
-                        ListView.builder(
-                            physics: ClampingScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: _recipes[ingredientName].length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Text(_recipes[ingredientName][index].recipeName);
-                            }
-                        ),
-                      ],
-                    )
-                );
-              },
-              separatorBuilder: (BuildContext context, int index) => const Divider(),
-            )
+            IngredientSearchResults(ingredientsAndRecipes: _ingredientsAndRecipes)
           ],
         ),
     );
@@ -117,14 +90,14 @@ class _MyHomePageState extends State<MyHomePage> {
       selectionDifference.forEach((ingredient) async {
         final recipeIngredients = await ingredient.fetchRecipes();
         setState(() {
-          _recipes[ingredient.name] = recipeIngredients;
+          _ingredientsAndRecipes[ingredient.name] = recipeIngredients;
         });
       });
     } else {
       List<Ingredient> selectionDifference = _previouslySelectedIngredients.toSet().difference(_selectedIngredients.toSet()).toList();
       selectionDifference.forEach((ingredient) {
         setState(() {
-          _recipes.remove(ingredient.name);
+          _ingredientsAndRecipes.remove(ingredient.name);
         });
       });
     }
