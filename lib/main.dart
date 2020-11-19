@@ -131,21 +131,3 @@ class _MyHomePageState extends State<MyHomePage> {
     _previouslySelectedIngredients = new List<Ingredient>.from(_selectedIngredients);
   }
 }
-
-Future<List<Ingredient>> fetchIngredientsContaining(String nameSubstring) async {
-  final response = await http.get("https://recapi.azurewebsites.net/api/Ingredients/search?query=$nameSubstring");
-
-  if (response.statusCode == 200) {
-    List<dynamic> ingredientsJson = json.decode(response.body);
-    List<Ingredient> ingredients = [];
-
-    ingredientsJson.forEach((value) {
-      ingredients.add(Ingredient.fromJson(value));
-    });
-
-    return ingredients;
-  }
-  else {
-    throw Exception("Failed to load ingredient");
-  }
-}
